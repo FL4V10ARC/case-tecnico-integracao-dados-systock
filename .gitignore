@@ -63,5 +63,11 @@ env/
 # Dados processados
 # ==============================
 
-data/processed/*
-!data/processed/.gitkeep
+# Os CSVs do case são versionados para permitir
+# reprodução do processo de importação.
+
+# ==============================
+# Backups locais do banco
+# ==============================
+
+backup/*.dump
