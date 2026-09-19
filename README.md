@@ -36,6 +36,7 @@ A solução foi estruturada para reproduzir um cenário de integração de dados
 
 ## Tecnologias
 
+* DBeaver
 * PostgreSQL
 * SQL
 * Git
