@@ -4,12 +4,22 @@
 --
 -- Arquivo: 06-trigger.sql
 -- Objetivo:
---     Criar e configurar o identificador numérico do fornecedor
---     e automatizar seu preenchimento na tabela de produtos.
+--     Gerar automaticamente um identificador numérico para
+--     fornecedores e relacioná-lo aos produtos.
 -- ============================================================
 
+
 -- ============================================================
--- 1. ADICIONAR IDENTIFICADOR NUMÉRICO AO FORNECEDOR
+-- 1. SEQUENCE PARA GERAÇÃO DOS IDENTIFICADORES
+-- ============================================================
+
+CREATE SEQUENCE IF NOT EXISTS seq_idfornecedor_numerico
+    START WITH 1
+    INCREMENT BY 1;
+
+
+-- ============================================================
+-- 2. IDENTIFICADOR NUMÉRICO NO CADASTRO DE FORNECEDORES
 -- ============================================================
 
 ALTER TABLE fornecedor
@@ -17,7 +27,37 @@ ADD COLUMN IF NOT EXISTS idfornecedor_numerico BIGINT;
 
 
 -- ============================================================
--- 2. PREENCHER O IDENTIFICADOR NUMÉRICO DOS FORNECEDORES
+-- 3. FUNÇÃO PARA GERAR AUTOMATICAMENTE O ID DO FORNECEDOR
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_gerar_idfornecedor_numerico()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.idfornecedor_numerico IS NULL THEN
+        NEW.idfornecedor_numerico :=
+            nextval('seq_idfornecedor_numerico');
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- ============================================================
+-- 4. TRIGGER DE GERAÇÃO DO ID DO FORNECEDOR
+-- ============================================================
+
+DROP TRIGGER IF EXISTS trg_gerar_idfornecedor_numerico
+ON fornecedor;
+
+CREATE OR REPLACE TRIGGER trg_gerar_idfornecedor_numerico
+BEFORE INSERT ON fornecedor
+FOR EACH ROW
+EXECUTE FUNCTION fn_gerar_idfornecedor_numerico();
+
+
+-- ============================================================
+-- 5. AJUSTE DOS DADOS EXISTENTES
 -- ============================================================
 
 UPDATE fornecedor
@@ -26,8 +66,15 @@ SET idfornecedor_numerico =
 WHERE idfornecedor_numerico IS NULL;
 
 
+-- Garante que a próxima sequência não gere um ID já utilizado.
+SELECT setval(
+    'seq_idfornecedor_numerico',
+    COALESCE((SELECT MAX(idfornecedor_numerico) FROM fornecedor), 0)
+);
+
+
 -- ============================================================
--- 3. GARANTIR UNICIDADE DO IDENTIFICADOR NUMÉRICO
+-- 6. RESTRIÇÃO DE UNICIDADE
 -- ============================================================
 
 ALTER TABLE fornecedor
@@ -39,17 +86,14 @@ UNIQUE (idfornecedor_numerico);
 
 
 -- ============================================================
--- 4. ADICIONAR IDENTIFICADOR NUMÉRICO À TABELA DE PRODUTOS
+-- 7. IDENTIFICADOR NUMÉRICO NA TABELA DE PRODUTOS
 -- ============================================================
 
 ALTER TABLE produtos_filial
 ADD COLUMN IF NOT EXISTS idfornecedor_numerico BIGINT;
 
 
--- ============================================================
--- 5. PREENCHER O IDENTIFICADOR NUMÉRICO DOS PRODUTOS
--- ============================================================
-
+-- Preenchimento dos produtos já existentes.
 UPDATE produtos_filial p
 SET idfornecedor_numerico = f.idfornecedor_numerico
 FROM fornecedor f
@@ -58,7 +102,7 @@ WHERE p.idfornecedor = f.idfornecedor
 
 
 -- ============================================================
--- 6. GARANTIR O RELACIONAMENTO COM O FORNECEDOR
+-- 8. RELACIONAMENTO ENTRE PRODUTO E FORNECEDOR
 -- ============================================================
 
 ALTER TABLE produtos_filial
@@ -71,7 +115,7 @@ REFERENCES fornecedor (idfornecedor_numerico);
 
 
 -- ============================================================
--- 7. FUNÇÃO DA TRIGGER
+-- 9. TRIGGER PARA RELACIONAR O PRODUTO AO FORNECEDOR
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION fn_preencher_idfornecedor_numerico()
@@ -95,14 +139,9 @@ BEGIN
     END IF;
 
     RETURN NEW;
-
 END;
 $$ LANGUAGE plpgsql;
 
-
--- ============================================================
--- 8. TRIGGER
--- ============================================================
 
 DROP TRIGGER IF EXISTS trg_preencher_idfornecedor_numerico
 ON produtos_filial;
@@ -115,7 +154,7 @@ EXECUTE FUNCTION fn_preencher_idfornecedor_numerico();
 
 
 -- ============================================================
--- 9. VALIDAÇÃO DO MAPEAMENTO
+-- 10. CONSULTA DE VALIDAÇÃO DOS FORNECEDORES
 -- ============================================================
 
 SELECT
@@ -127,7 +166,7 @@ ORDER BY idfornecedor_numerico;
 
 
 -- ============================================================
--- 10. VALIDAÇÃO DOS PRODUTOS
+-- 11. CONSULTA DE VALIDAÇÃO DOS PRODUTOS
 -- ============================================================
 
 SELECT

@@ -65,9 +65,3 @@ env/
 
 # Os CSVs do case são versionados para permitir
 # reprodução do processo de importação.
-
-# ==============================
-# Backups locais do banco
-# ==============================
-
-backup/*.dump

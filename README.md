@@ -41,7 +41,7 @@ A base original é preservada sem alterações, enquanto os tratamentos, consult
 ## Tecnologias
 
 - DBeaver
-- PostgreSQL
+- PostgreSQL 18
 - SQL
 - Git
 - GitHub
@@ -53,7 +53,7 @@ A base original é preservada sem alterações, enquanto os tratamentos, consult
 
 ```text
 case-tecnico-integracao-dados-systock/
-
+│
 ├── README.md
 ├── .gitignore
 │
@@ -77,6 +77,7 @@ case-tecnico-integracao-dados-systock/
 ├── data/
 │   ├── original/
 │   │   └── base_teste_systock.xlsx
+│   │
 │   └── processed/
 │       ├── fornecedor.csv
 │       ├── produtos_filial.csv
@@ -85,8 +86,36 @@ case-tecnico-integracao-dados-systock/
 │       └── entradas_mercadoria.csv
 │
 ├── backup/
+│   └── systock_case_backup.dump
 │
 └── evidence/
+    ├── 01-Auditoria-volumes.png
+    ├── 02-Auditoria-nulos.png
+    ├── 03-Auditoria-valores-negativos.png
+    ├── 04-INCO01-produtos-sem-cadastro.png
+    ├── 05-INCO02-filiais-sem-cadastro.png
+    ├── 06-INCO03-ordem-compra-zero.png
+    ├── 07-INCO04-entradas-sem-pedido.png
+    ├── 08-INCO05-inconsistencia-temporal.png
+    ├── 09-INCO06-divergencia-pedido-recebimento.png
+    ├── 10-2.1-consumo-fevereiro.png
+    ├── 11-2.2-produtos-nao-recebidos.png
+    ├── 12-3.1-concatenacao-produto.png
+    ├── 13-3.2-formatacao-datas.png
+    ├── 14-3.3-produtos-mais-10-requisicoes.png
+    ├── 15-3.4-teste-trigger.png
+    ├── 16-3.4-rollback-teste-trigger.png
+    ├── 17-4.1-validacao-quantidade-registros.png
+    ├── 18-4.2-validacao-valores-nulos.png
+    ├── 19-4.3-validacao-valores-negativos.png
+    ├── 20-4.4-produtos-vendidos-sem-cadastro.png
+    ├── 21-4.5-entradas-sem-pedido.png
+    ├── 22-4.6-divergencia-pedido-recebimento.png
+    ├── 23-4.7-inconsistencia-temporal.png
+    ├── 24-4.8-relacionamento-produto-fornecedor.png
+    ├── 25-4.9-integridade-idfornecedor-numerico.png
+    ├── 26-4.10-identificadores-fornecedor.png
+    └── 27-4.11-validacao-identificadores-produtos.png
 ```
 
 ---
@@ -178,7 +207,8 @@ As principais regras utilizadas durante a implementação incluem:
 - apresentação de datas no formato `DD/MM/YYYY`;
 - identificação de produtos requisitados mais de 10 vezes;
 - relacionamento entre produtos e fornecedores;
-- preenchimento automático do identificador numérico do fornecedor no cadastro de produtos;
+- geração automática de identificador numérico para fornecedores;
+- relacionamento do identificador numérico do fornecedor com os produtos;
 - validação das quantidades solicitadas e recebidas;
 - preservação dos dados originais quando não existe regra suficiente para determinar uma correção.
 
@@ -188,45 +218,260 @@ As regras estão documentadas em:
 
 ---
 
-## Consultas e resultados
+# Consultas e resultados
 
 As consultas SQL foram organizadas em arquivos específicos para facilitar a reprodução do processo.
 
-Entre os resultados obtidos estão:
-
-### Consumo por produto em fevereiro de 2025
+## Consumo por produto em fevereiro de 2025
 
 Foi realizada a consolidação da quantidade consumida e do valor total por produto para o período solicitado no case.
 
-### Produtos solicitados, mas não recebidos
+A consulta utilizada está em:
 
-Foi realizada a identificação dos pedidos que não apresentaram quantidade recebida.
+`database/04-basic-queries.sql`
 
-### Transformações
+O resultado contempla:
 
-Foram implementadas transformações para:
-
-- concatenar `produto_id` e descrição;
-- formatar datas para `DD/MM/YYYY`;
-- identificar produtos requisitados mais de 10 vezes.
-
-### Automação
-
-Foi implementada uma trigger para preenchimento automático do identificador numérico do fornecedor na tabela de produtos.
-
-A trigger foi testada utilizando uma operação controlada com `ROLLBACK`, garantindo que o registro utilizado no teste não permanecesse na base.
-
-Os resultados detalhados estão disponíveis em:
-
-`docs/06-resultados.md`
+- `produto_id`;
+- quantidade consumida;
+- valor total consumido.
 
 ---
 
-## Validação da implantação
+## Produtos solicitados, mas não recebidos
+
+Foi realizada a identificação dos pedidos que foram requisitados, mas não apresentaram quantidade recebida nas entradas de mercadoria.
+
+O relacionamento entre pedidos e entradas considera o campo `ordem_compra`, conforme orientação do case.
+
+A consulta utilizada está em:
+
+`database/04-basic-queries.sql`
+
+---
+
+# Transformações
+
+Foram implementadas transformações SQL para atender aos requisitos da Parte 3.
+
+## 1. Concatenação de produto
+
+Foi criada uma consulta para concatenar:
+
+```text
+produto_id + descrição
+```
+
+no formato:
+
+```text
+P14 - Descrição do produto
+```
+
+Consulta:
+
+`database/05-transformations.sql`
+
+Evidência:
+
+`evidence/12-3.1-concatenacao-produto.png`
+
+---
+
+## 2. Formatação das datas
+
+As datas foram transformadas para o formato solicitado:
+
+```text
+DD/MM/YYYY
+```
+
+Utilizando a função:
+
+```sql
+TO_CHAR(data_pedido, 'DD/MM/YYYY')
+```
+
+Consulta:
+
+`database/05-transformations.sql`
+
+Evidência:
+
+`evidence/13-3.2-formatacao-datas.png`
+
+---
+
+## 3. Produtos requisitados mais de 10 vezes
+
+Foi criada uma consulta utilizando `GROUP BY`, `COUNT()` e `HAVING` para identificar produtos requisitados mais de 10 vezes no período analisado.
+
+Consulta:
+
+`database/05-transformations.sql`
+
+O resultado da análise não apresentou produtos que ultrapassassem o limite de 10 requisições.
+
+Evidência:
+
+`evidence/14-3.3-produtos-mais-10-requisicoes.png`
+
+---
+
+# Trigger e geração do identificador numérico do fornecedor
+
+Para atender ao requisito de geração automática de um novo identificador numérico para fornecedores, foi implementada uma solução utilizando:
+
+- `SEQUENCE`;
+- função `PL/pgSQL`;
+- trigger `BEFORE INSERT`;
+- relacionamento entre fornecedor e produto;
+- validações de integridade.
+
+A sequência utilizada é:
+
+```text
+seq_idfornecedor_numerico
+```
+
+A função responsável pela geração é:
+
+```text
+fn_gerar_idfornecedor_numerico()
+```
+
+E a trigger é:
+
+```text
+trg_gerar_idfornecedor_numerico
+```
+
+O script completo está disponível em:
+
+`database/06-trigger.sql`
+
+---
+
+## Funcionamento da trigger
+
+O fluxo implementado é:
+
+```text
+Novo fornecedor
+      ↓
+INSERT na tabela fornecedor
+      ↓
+Trigger BEFORE INSERT
+      ↓
+Verificação do identificador numérico
+      ↓
+Próximo valor da SEQUENCE
+      ↓
+idfornecedor_numerico
+      ↓
+Relacionamento com produtos
+```
+
+A sequência foi inicialmente sincronizada com os identificadores existentes na base.
+
+Os fornecedores existentes foram relacionados da seguinte forma:
+
+```text
+F1  → 1
+F2  → 2
+F3  → 3
+...
+F20 → 20
+```
+
+Após a sincronização, o próximo fornecedor cadastrado recebe automaticamente o próximo identificador disponível.
+
+---
+
+## Integridade do relacionamento
+
+A tabela `fornecedor` possui o campo:
+
+```text
+idfornecedor_numerico
+```
+
+do tipo `BIGINT`.
+
+O campo é utilizado como identificador numérico para o relacionamento com os produtos.
+
+Foi criada uma restrição `UNIQUE` para impedir identificadores numéricos duplicados.
+
+Também foi criada uma chave estrangeira na tabela `produtos_filial`, garantindo que o identificador numérico utilizado pelo produto exista no cadastro de fornecedores.
+
+---
+
+## Teste da trigger
+
+Foi realizado um teste controlado para verificar o funcionamento da geração automática.
+
+O fornecedor de teste utilizado foi:
+
+```text
+F21
+```
+
+Durante o teste, a trigger gerou:
+
+```text
+F21 → 21
+```
+
+Também foi realizado um teste de relacionamento com um produto fictício.
+
+O produto de teste foi:
+
+```text
+TESTE_F21
+```
+
+e recebeu o identificador numérico correspondente ao fornecedor.
+
+O teste foi executado dentro de uma transação e finalizado com:
+
+```sql
+ROLLBACK;
+```
+
+Dessa forma, os registros utilizados exclusivamente para teste não permaneceram na base definitiva.
+
+Evidências:
+
+- `evidence/15-3.4-teste-trigger.png`
+- `evidence/16-3.4-rollback-teste-trigger.png`
+
+---
+
+## Sincronização da sequência
+
+Após os testes, a sequência foi sincronizada novamente com o maior identificador existente na base.
+
+O maior identificador existente é:
+
+```text
+20
+```
+
+A sequência foi ajustada para que o próximo valor disponível seja:
+
+```text
+21
+```
+
+Isso evita conflitos entre identificadores já existentes e novos fornecedores cadastrados.
+
+---
+
+# Validação da implantação
 
 A validação final é realizada por meio de consultas SQL no PostgreSQL, permitindo verificar a integridade dos dados importados, os relacionamentos entre as tabelas, as inconsistências identificadas e as transformações aplicadas durante o processo.
 
-### Validação da quantidade de registros
+## Validação da quantidade de registros
 
 A primeira etapa da validação consistiu em comparar a quantidade de registros carregados no banco com a quantidade esperada para cada tabela.
 
@@ -246,7 +491,7 @@ Os resultados obtidos correspondem às quantidades esperadas para as tabelas ana
 
 ---
 
-### Validação de valores nulos
+## Validação de valores nulos
 
 Foi realizada uma verificação das tabelas `venda`, `pedido_compra` e `entradas_mercadoria` para identificar registros sem `produto_id`.
 
@@ -264,7 +509,7 @@ A consulta não identificou registros com valor nulo no campo analisado.
 
 ---
 
-### Validação de valores negativos
+## Validação de valores negativos
 
 Foi realizada uma verificação das tabelas `venda`, `pedido_compra`, `entradas_mercadoria` e `produtos_filial` para identificar quantidades, preços e valores financeiros negativos.
 
@@ -283,7 +528,7 @@ A consulta não identificou registros com valores negativos nos campos analisado
 
 ---
 
-### Validação de produtos vendidos sem cadastro
+## Validação de produtos vendidos sem cadastro
 
 Foi realizada uma validação para identificar produtos presentes na tabela `venda` que não possuem cadastro correspondente na tabela `produtos_filial`.
 
@@ -308,7 +553,7 @@ Essa ocorrência já havia sido identificada durante a análise inicial da quali
 
 ---
 
-### Validação de entradas de mercadoria sem pedido de compra
+## Validação de entradas de mercadoria sem pedido de compra
 
 Foi realizada uma validação para identificar entradas de mercadoria que não possuem um pedido de compra correspondente.
 
@@ -327,7 +572,7 @@ Essas ocorrências foram identificadas durante a análise inicial da qualidade d
 
 ---
 
-### Validação de divergência entre pedido e recebimento
+## Validação de divergência entre pedido e recebimento
 
 Foi realizada uma comparação entre as quantidades registradas nos pedidos de compra e as quantidades encontradas nas entradas de mercadoria.
 
@@ -343,7 +588,7 @@ As divergências foram mantidas como evidências da qualidade da fonte e não fo
 
 ---
 
-### Validação de inconsistências temporais
+## Validação de inconsistências temporais
 
 Foi realizada uma validação para identificar pedidos em que a `data_entrega` é anterior à `data_pedido`.
 
@@ -357,11 +602,16 @@ A ocorrência foi mantida como evidência da qualidade da fonte, sem alteração
 
 ---
 
-### Validação do relacionamento entre produto e fornecedor
+## Validação do relacionamento entre produto e fornecedor
 
 Foi realizada uma validação do relacionamento entre os produtos cadastrados e seus respectivos fornecedores.
 
-A consulta apresentou os 20 produtos cadastrados, permitindo verificar o `idfornecedor`, o identificador numérico associado e a razão social correspondente.
+A consulta apresentou os 20 produtos cadastrados, permitindo verificar:
+
+- `produto_id`;
+- `idfornecedor`;
+- `idfornecedor_numerico`;
+- razão social do fornecedor.
 
 A validação demonstrou a correspondência entre os registros de produtos e fornecedores cadastrados.
 
@@ -371,7 +621,7 @@ A validação demonstrou a correspondência entre os registros de produtos e for
 
 ---
 
-### Validação da integridade do identificador numérico do fornecedor
+## Validação da integridade do identificador numérico do fornecedor
 
 Foi realizada uma validação para identificar produtos sem `idfornecedor_numerico` ou com fornecedor não localizado no cadastro.
 
@@ -385,7 +635,7 @@ A consulta não retornou registros, indicando que todos os produtos analisados p
 
 ---
 
-### Validação dos identificadores de fornecedor
+## Validação dos identificadores de fornecedor
 
 Foi realizada uma validação do cadastro de fornecedores para verificar a correspondência entre o identificador original (`idfornecedor`) e o identificador numérico (`idfornecedor_numerico`).
 
@@ -405,7 +655,7 @@ Os 20 fornecedores apresentaram correspondência entre os identificadores e suas
 
 ---
 
-### Validação dos identificadores dos produtos
+## Validação dos identificadores dos produtos
 
 Foi realizada uma validação final da tabela `produtos_filial` para verificar o preenchimento dos identificadores de fornecedor.
 
@@ -417,7 +667,34 @@ Os 20 produtos analisados apresentam `idfornecedor` e `idfornecedor_numerico` pr
 
 ---
 
-## Evidências
+# Estratégia de validação com o cliente
+
+A validação com o cliente foi estruturada considerando o mês de fevereiro de 2025 e os principais pontos que impactam a confiabilidade dos dados.
+
+Os principais pontos a serem apresentados são:
+
+- quantidade de registros importados;
+- consistência dos produtos;
+- consumo por produto;
+- pedidos de compra;
+- entradas de mercadoria;
+- produtos requisitados e não recebidos;
+- divergências de quantidades;
+- consistência das datas;
+- relacionamento entre produtos e fornecedores;
+- identificação das inconsistências encontradas na fonte.
+
+A estratégia completa está documentada em:
+
+`docs/05-estrategia-de-validacao.md`
+
+As consultas de apoio à reunião estão disponíveis em:
+
+`database/07-client-validation.sql`
+
+---
+
+# Evidências
 
 As evidências das principais etapas do projeto estão armazenadas na pasta:
 
@@ -432,13 +709,15 @@ As evidências incluem:
 - resultados das consultas SQL;
 - transformações realizadas;
 - testes da trigger;
-- validações da implantação.
+- rollback dos testes;
+- validações da implantação;
+- validação do relacionamento entre produtos e fornecedores.
 
-A numeração das evidências segue a ordem cronológica de execução das etapas.
+A numeração das evidências segue a ordem das etapas executadas durante o desenvolvimento.
 
 ---
 
-## Documentação
+# Documentação
 
 A documentação do projeto está organizada em etapas:
 
@@ -453,7 +732,7 @@ A documentação do projeto está organizada em etapas:
 
 ---
 
-## Banco de dados
+# Banco de dados
 
 Os scripts SQL estão organizados conforme a sequência lógica de execução:
 
@@ -462,12 +741,44 @@ Os scripts SQL estão organizados conforme a sequência lógica de execução:
 3. `03-fixes-and-validations.sql` — validações e identificação de inconsistências;
 4. `04-basic-queries.sql` — consultas solicitadas no case;
 5. `05-transformations.sql` — transformações dos dados;
-6. `06-trigger.sql` — automação relacionada ao fornecedor;
+6. `06-trigger.sql` — geração e relacionamento do identificador numérico do fornecedor;
 7. `07-client-validation.sql` — consultas de validação final.
 
 ---
 
-## Qualidade e rastreabilidade
+# Processo de importação
+
+A planilha original foi analisada e seus dados foram separados em arquivos CSV correspondentes às tabelas do banco.
+
+A estrutura processada foi:
+
+```text
+fornecedor.csv
+produtos_filial.csv
+venda.csv
+pedido_compra.csv
+entradas_mercadoria.csv
+```
+
+A importação foi realizada utilizando o **DBeaver**, conectado ao PostgreSQL.
+
+Durante o processo foram considerados:
+
+- conversão de datas;
+- conversão de tipos numéricos;
+- tratamento dos nomes das colunas;
+- adequação da estrutura dos dados ao modelo PostgreSQL;
+- validação dos registros após a importação;
+- preservação dos dados originais;
+- identificação das inconsistências existentes na fonte.
+
+A documentação detalhada está disponível em:
+
+`docs/02-processo-de-importacao.md`
+
+---
+
+# Qualidade e rastreabilidade
 
 A base original é preservada sem alterações.
 
@@ -497,47 +808,177 @@ Essa abordagem permite acompanhar as decisões tomadas durante a implantação e
 
 ---
 
-## Backup
+# Backup do banco
 
-Antes da disponibilização definitiva da base, será realizado um backup completo do banco PostgreSQL utilizando `pg_dump`.
+O case solicita a disponibilização do backup do banco analisado.
 
-Exemplo:
+Foi gerado um backup completo da base PostgreSQL utilizando `pg_dump` no formato custom.
+
+Arquivo disponibilizado no projeto:
+
+```text
+backup/systock_case_backup.dump
+```
+
+Comando utilizado:
 
 ```bash
 pg_dump -h localhost -p 5433 -U postgres -d systock_case -F c -f backup/systock_case_backup.dump
 ```
 
-O backup será armazenado em local controlado e utilizado como mecanismo de recuperação da base em caso de necessidade.
+## Restauração do backup
+
+Para restaurar o backup em uma base PostgreSQL:
+
+```bash
+pg_restore -h localhost -p 5433 -U postgres -d systock_case backup/systock_case_backup.dump
+```
+
+O backup contém a estrutura e os dados utilizados durante a análise, incluindo as alterações necessárias para a implementação e validação da solução.
 
 ---
 
-## Status
+# Como reproduzir o projeto
 
-✅ **Projeto concluído tecnicamente**
+## 1. Criar o banco
+
+Criar uma base PostgreSQL chamada:
+
+```text
+systock_case
+```
+
+## 2. Executar a criação das tabelas
+
+Executar:
+
+```text
+database/01-create-tables.sql
+```
+
+## 3. Importar os dados
+
+Realizar a importação dos arquivos CSV presentes em:
+
+```text
+data/processed/
+```
+
+A ordem recomendada é:
+
+```text
+fornecedor.csv
+produtos_filial.csv
+venda.csv
+pedido_compra.csv
+entradas_mercadoria.csv
+```
+
+As orientações estão documentadas em:
+
+```text
+database/02-import-data.sql
+```
+
+## 4. Executar as validações iniciais
+
+Executar:
+
+```text
+database/03-fixes-and-validations.sql
+```
+
+## 5. Executar as consultas do case
+
+Executar:
+
+```text
+database/04-basic-queries.sql
+```
+
+## 6. Executar as transformações
+
+Executar:
+
+```text
+database/05-transformations.sql
+```
+
+## 7. Configurar a trigger
+
+Executar:
+
+```text
+database/06-trigger.sql
+```
+
+## 8. Executar as validações finais
+
+Executar:
+
+```text
+database/07-client-validation.sql
+```
+
+---
+
+# Considerações finais
+
+O projeto foi desenvolvido buscando reproduzir um cenário real de implantação e integração de dados.
+
+Além da execução das consultas solicitadas, foram priorizados:
+
+- análise da qualidade da fonte;
+- identificação de inconsistências;
+- integridade referencial;
+- rastreabilidade;
+- documentação das decisões;
+- validação dos resultados;
+- testes controlados;
+- preservação dos dados originais;
+- backup da base;
+- organização das evidências.
+
+As inconsistências identificadas não foram corrigidas de forma arbitrária. Quando não havia informação suficiente para determinar o valor correto, a ocorrência foi mantida e documentada para validação com o responsável pelo processo.
+
+Essa abordagem permite diferenciar claramente:
+
+```text
+Dado original
+      ↓
+Inconsistência identificada
+      ↓
+Regra aplicada
+      ↓
+Resultado validado
+```
+
+---
+
+# Status do projeto
+
+## ✅ Projeto concluído tecnicamente
 
 Etapas realizadas:
 
-- análise da estrutura da base;
-- análise da qualidade dos dados;
-- identificação das inconsistências;
-- modelagem do banco PostgreSQL;
-- importação dos dados;
-- consultas solicitadas no case;
-- transformações;
-- implementação e teste da trigger;
-- documentação das regras de negócio;
-- documentação da estratégia de validação;
-- validações finais da base;
-- geração das evidências das validações.
+- [x] Análise da estrutura da base;
+- [x] Análise da qualidade dos dados;
+- [x] Identificação das inconsistências;
+- [x] Modelagem do banco PostgreSQL;
+- [x] Importação dos dados;
+- [x] Consultas solicitadas no case;
+- [x] Transformações;
+- [x] Implementação da geração automática do identificador numérico do fornecedor;
+- [x] Relacionamento entre fornecedor e produtos;
+- [x] Teste da trigger;
+- [x] Rollback dos dados de teste;
+- [x] Sincronização da sequência;
+- [x] Documentação das regras de negócio;
+- [x] Documentação da estratégia de validação;
+- [x] Validações finais da base;
+- [x] Geração das evidências;
+- [x] Geração do backup PostgreSQL;
+- [x] Versionamento com Git;
+- [x] Publicação do projeto no GitHub.
 
-### Próximas etapas
-
-- realizar o backup final do banco PostgreSQL;
-- revisar a documentação;
-- verificar a integridade dos arquivos do projeto;
-- revisar o `.gitignore`;
-- executar a revisão final do Git;
-- realizar o commit final;
-- publicar a versão final no GitHub.
-
----
+O projeto está preparado para entrega e avaliação.
