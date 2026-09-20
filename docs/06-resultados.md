@@ -141,11 +141,32 @@ A regra utilizada foi:
 
 `COUNT(*) > 10`
 
-A consulta não retornou registros.
+A consulta individual não retornou registros. Dessa forma, nenhum produto apresentou mais de 10 requisições no conjunto de dados analisado.
 
-Dessa forma, nenhum produto apresentou mais de 10 requisições no conjunto de dados analisado.
+Além da consulta individual, foi adicionada uma consulta final que reproduz o formato apresentado no enunciado da Parte 3, combinando em uma única tabela:
 
-A consulta utilizada está disponível em:
+- produto, formado pela concatenação de `produto_id` e `descricao_produto`;
+- quantidade de requisições;
+- data da solicitação formatada em `DD/MM/YYYY`.
+
+A consulta combinada é executada sobre `pedido_compra`, utilizando `COUNT(*)`, `TO_CHAR` e `GROUP BY`.
+
+Como nenhum produto da base ultrapassa 10 requisições, essa consulta também retorna 0 linhas. Portanto, o exemplo apresentado no enunciado representa o **formato esperado da saída**, e não um resultado necessariamente existente na base de teste fornecida.
+
+Consulta utilizada:
+
+```sql
+SELECT
+    CONCAT(produto_id, ' - ', descricao_produto) AS produto,
+    COUNT(*) AS qtde_requisitada,
+    TO_CHAR(MIN(data_pedido), 'DD/MM/YYYY') AS data_solicitacao
+FROM pedido_compra
+GROUP BY produto_id, descricao_produto
+HAVING COUNT(*) > 10
+ORDER BY qtde_requisitada DESC;
+```
+
+A consulta completa está disponível em:
 
 `database/05-transformations.sql`
 

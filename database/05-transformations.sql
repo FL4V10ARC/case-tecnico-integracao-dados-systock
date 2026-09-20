@@ -33,3 +33,26 @@ FROM pedido_compra
 GROUP BY produto_id
 HAVING COUNT(*) > 10
 ORDER BY quantidade_requisicoes DESC, produto_id;
+
+-- ============================================================
+-- 3.4 - Resultado combinado das transformações da Parte 3
+--
+-- O enunciado apresenta como resultado esperado uma tabela
+-- combinando:
+--   - produto (produto_id + descricao_produto);
+--   - quantidade de requisições;
+--   - data da solicitação formatada.
+--
+-- A consulta abaixo reproduz esse formato sobre pedido_compra.
+-- Neste conjunto de dados, nenhum produto possui mais de 10
+-- requisições, portanto a consulta retorna 0 linhas.
+-- ============================================================
+
+SELECT
+    CONCAT(produto_id, ' - ', descricao_produto) AS produto,
+    COUNT(*) AS qtde_requisitada,
+    TO_CHAR(MIN(data_pedido), 'DD/MM/YYYY') AS data_solicitacao
+FROM pedido_compra
+GROUP BY produto_id, descricao_produto
+HAVING COUNT(*) > 10
+ORDER BY qtde_requisitada DESC;
