@@ -11,9 +11,13 @@ O objetivo é demonstrar o processo de análise, importação, tratamento, valid
 O projeto utiliza uma base de dados fornecida em formato Excel contendo informações relacionadas a:
 
 - vendas;
+
 - pedidos de compra;
+
 - entradas de mercadoria;
+
 - produtos por filial;
+
 - fornecedores.
 
 A solução foi estruturada para reproduzir um cenário de integração de dados, considerando tanto a estrutura esperada quanto as inconsistências identificadas na fonte recebida.
@@ -25,15 +29,25 @@ A base original é preservada sem alterações, enquanto os tratamentos, consult
 ## Objetivos
 
 - Analisar a estrutura e a qualidade dos dados recebidos;
+
 - Identificar inconsistências e problemas de integridade;
+
 - Modelar os dados em um banco PostgreSQL;
+
 - Importar os dados para o banco;
+
 - Aplicar tratamentos e validações utilizando SQL;
+
 - Desenvolver as consultas solicitadas no case;
+
 - Implementar as transformações e automações necessárias;
+
 - Documentar as decisões tomadas durante o processo;
+
 - Validar os resultados obtidos;
+
 - Manter evidências das principais etapas;
+
 - Gerar um backup do banco ao final do processo.
 
 ---
@@ -41,10 +55,15 @@ A base original é preservada sem alterações, enquanto os tratamentos, consult
 ## Tecnologias
 
 - DBeaver
+
 - PostgreSQL 18
+
 - SQL
+
 - Git
+
 - GitHub
+
 - Microsoft Excel
 
 ---
@@ -52,70 +71,135 @@ A base original é preservada sem alterações, enquanto os tratamentos, consult
 ## Estrutura do projeto
 
 ```text
+
 case-tecnico-integracao-dados-systock/
+
 │
+
 ├── README.md
+
 ├── .gitignore
+
 │
+
 ├── docs/
-│   ├── 01-entendimento-do-case.md
-│   ├── 02-processo-de-importacao.md
-│   ├── 03-erros-e-inconsistencias.md
-│   ├── 04-regras-de-negocio.md
-│   ├── 05-estrategia-de-validacao.md
-│   └── 06-resultados.md
+
+│   ├── 01-entendimento-do-case.md
+
+│   ├── 02-processo-de-importacao.md
+
+│   ├── 03-erros-e-inconsistencias.md
+
+│   ├── 04-regras-de-negocio.md
+
+│   ├── 05-estrategia-de-validacao.md
+
+│   └── 06-resultados.md
+
 │
+
 ├── database/
-│   ├── 01-create-tables.sql
-│   ├── 02-import-data.sql
-│   ├── 03-fixes-and-validations.sql
-│   ├── 04-basic-queries.sql
-│   ├── 05-transformations.sql
-│   ├── 06-trigger.sql
-│   └── 07-client-validation.sql
+
+│   ├── 01-create-tables.sql
+
+│   ├── 02-import-data.sql
+
+│   ├── 03-fixes-and-validations.sql
+
+│   ├── 04-basic-queries.sql
+
+│   ├── 05-transformations.sql
+
+│   ├── 06-trigger.sql
+
+│   └── 07-client-validation.sql
+
 │
+
 ├── data/
-│   ├── original/
-│   │   └── base_teste_systock.xlsx
-│   │
-│   └── processed/
-│       ├── fornecedor.csv
-│       ├── produtos_filial.csv
-│       ├── venda.csv
-│       ├── pedido_compra.csv
-│       └── entradas_mercadoria.csv
+
+│   ├── original/
+
+│   │   └── base_teste_systock.xlsx
+
+│   │
+
+│   └── processed/
+
+│       ├── fornecedor.csv
+
+│       ├── produtos_filial.csv
+
+│       ├── venda.csv
+
+│       ├── pedido_compra.csv
+
+│       └── entradas_mercadoria.csv
+
 │
+
 ├── backup/
-│   └── systock_case_backup.dump
+
+│   └── systock_case_backup.dump
+
 │
+
 └── evidence/
-    ├── 01-Auditoria-volumes.png
-    ├── 02-Auditoria-nulos.png
-    ├── 03-Auditoria-valores-negativos.png
-    ├── 04-INCO01-produtos-sem-cadastro.png
-    ├── 05-INCO02-filiais-sem-cadastro.png
-    ├── 06-INCO03-ordem-compra-zero.png
-    ├── 07-INCO04-entradas-sem-pedido.png
-    ├── 08-INCO05-inconsistencia-temporal.png
-    ├── 09-INCO06-divergencia-pedido-recebimento.png
-    ├── 10-2.1-consumo-fevereiro.png
-    ├── 11-2.2-produtos-nao-recebidos.png
-    ├── 12-3.1-concatenacao-produto.png
-    ├── 13-3.2-formatacao-datas.png
-    ├── 14-3.3-produtos-mais-10-requisicoes.png
-    ├── 15-3.4-teste-trigger.png
-    ├── 16-3.4-rollback-teste-trigger.png
-    ├── 17-4.1-validacao-quantidade-registros.png
-    ├── 18-4.2-validacao-valores-nulos.png
-    ├── 19-4.3-validacao-valores-negativos.png
-    ├── 20-4.4-produtos-vendidos-sem-cadastro.png
-    ├── 21-4.5-entradas-sem-pedido.png
-    ├── 22-4.6-divergencia-pedido-recebimento.png
-    ├── 23-4.7-inconsistencia-temporal.png
-    ├── 24-4.8-relacionamento-produto-fornecedor.png
-    ├── 25-4.9-integridade-idfornecedor-numerico.png
-    ├── 26-4.10-identificadores-fornecedor.png
-    └── 27-4.11-validacao-identificadores-produtos.png
+
+    ├── 01-Auditoria-volumes.png
+
+    ├── 02-Auditoria-nulos.png
+
+    ├── 03-Auditoria-valores-negativos.png
+
+    ├── 04-INCO01-produtos-sem-cadastro.png
+
+    ├── 05-INCO02-filiais-sem-cadastro.png
+
+    ├── 06-INCO03-ordem-compra-zero.png
+
+    ├── 07-INCO04-entradas-sem-pedido.png
+
+    ├── 08-INCO05-inconsistencia-temporal.png
+
+    ├── 09-INCO06-divergencia-pedido-recebimento.png
+
+    ├── 10-2.1-consumo-fevereiro.png
+
+    ├── 11-2.2-produtos-nao-recebidos.png
+
+    ├── 12-3.1-concatenacao-produto.png
+
+    ├── 13-3.2-formatacao-datas.png
+
+    ├── 14-3.3-produtos-mais-10-requisicoes.png
+
+    ├── 15-3.4-teste-trigger.png
+
+    ├── 16-3.4-rollback-teste-trigger.png
+
+    ├── 17-4.1-validacao-quantidade-registros.png
+
+    ├── 18-4.2-validacao-valores-nulos.png
+
+    ├── 19-4.3-validacao-valores-negativos.png
+
+    ├── 20-4.4-produtos-vendidos-sem-cadastro.png
+
+    ├── 21-4.5-entradas-sem-pedido.png
+
+    ├── 22-4.6-divergencia-pedido-recebimento.png
+
+    ├── 23-4.7-inconsistencia-temporal.png
+
+    ├── 24-4.8-relacionamento-produto-fornecedor.png
+
+    ├── 25-4.9-integridade-idfornecedor-numerico.png
+
+    ├── 26-4.10-identificadores-fornecedor.png
+
+    └── 27-4.11-validacao-identificadores-produtos.png
+
 ```
 
 ---
@@ -125,31 +209,57 @@ case-tecnico-integracao-dados-systock/
 O desenvolvimento segue um fluxo de implantação dividido em etapas:
 
 ```text
+
 Base recebida
-      ↓
+
+      ↓
+
 Análise da estrutura
-      ↓
+
+      ↓
+
 Análise da qualidade dos dados
-      ↓
+
+      ↓
+
 Identificação das inconsistências
-      ↓
+
+      ↓
+
 Definição das regras de tratamento
-      ↓
+
+      ↓
+
 Modelagem PostgreSQL
-      ↓
+
+      ↓
+
 Importação dos dados
-      ↓
+
+      ↓
+
 Validações e identificação de inconsistências
-      ↓
+
+      ↓
+
 Consultas SQL
-      ↓
+
+      ↓
+
 Transformações
-      ↓
+
+      ↓
+
 Automação com Trigger
-      ↓
+
+      ↓
+
 Validação dos resultados
-      ↓
+
+      ↓
+
 Backup
+
 ```
 
 ---
@@ -159,15 +269,25 @@ Backup
 Durante a análise da base foram realizadas verificações relacionadas a:
 
 - quantidade de registros;
+
 - valores nulos;
+
 - valores negativos;
+
 - registros duplicados;
+
 - produtos sem cadastro correspondente;
+
 - cobertura de produtos por filial;
+
 - ordens de compra sem identificação;
+
 - entradas de mercadoria sem pedido correspondente;
+
 - inconsistências entre datas;
+
 - divergências entre quantidades solicitadas e recebidas;
+
 - identificação e relacionamento de fornecedores.
 
 As inconsistências encontradas foram documentadas antes da aplicação de qualquer tratamento.
@@ -179,11 +299,17 @@ As inconsistências encontradas foram documentadas antes da aplicação de qualq
 Entre as inconsistências encontradas na base estão:
 
 - produtos presentes nas vendas sem cadastro correspondente em `produtos_filial`;
+
 - vendas associadas a filiais sem cobertura correspondente no cadastro de produtos;
+
 - pedidos de compra com `ordem_compra = 0`;
+
 - entradas de mercadoria sem pedido de compra correspondente;
+
 - datas de entrega anteriores às respectivas datas do pedido;
+
 - divergências entre quantidades registradas no pedido e quantidades recebidas;
+
 - diferenças entre a identificação do fornecedor na fonte e a estrutura utilizada no banco.
 
 As evidências dessas ocorrências estão armazenadas na pasta `evidence/`.
@@ -199,17 +325,29 @@ A documentação detalhada está disponível em:
 As principais regras utilizadas durante a implementação incluem:
 
 - identificação de produtos por `produto_id`;
+
 - relacionamento entre produto e filial;
+
 - cálculo do consumo por produto;
+
 - análise do período de fevereiro de 2025;
+
 - identificação de produtos solicitados e não recebidos;
+
 - concatenação de código e descrição do produto;
+
 - apresentação de datas no formato `DD/MM/YYYY`;
+
 - identificação de produtos requisitados mais de 10 vezes;
+
 - relacionamento entre produtos e fornecedores;
+
 - geração automática de identificador numérico para fornecedores;
+
 - relacionamento do identificador numérico do fornecedor com os produtos;
+
 - validação das quantidades solicitadas e recebidas;
+
 - preservação dos dados originais quando não existe regra suficiente para determinar uma correção.
 
 As regras estão documentadas em:
@@ -233,7 +371,9 @@ A consulta utilizada está em:
 O resultado contempla:
 
 - `produto_id`;
+
 - quantidade consumida;
+
 - valor total consumido.
 
 ---
@@ -259,13 +399,17 @@ Foram implementadas transformações SQL para atender aos requisitos da Parte 3.
 Foi criada uma consulta para concatenar:
 
 ```text
+
 produto_id + descrição
+
 ```
 
 no formato:
 
 ```text
+
 P14 - Descrição do produto
+
 ```
 
 Consulta:
@@ -283,13 +427,17 @@ Evidência:
 As datas foram transformadas para o formato solicitado:
 
 ```text
+
 DD/MM/YYYY
+
 ```
 
 Utilizando a função:
 
 ```sql
+
 TO_CHAR(data_pedido, 'DD/MM/YYYY')
+
 ```
 
 Consulta:
@@ -323,27 +471,37 @@ Evidência:
 Para atender ao requisito de geração automática de um novo identificador numérico para fornecedores, foi implementada uma solução utilizando:
 
 - `SEQUENCE`;
+
 - função `PL/pgSQL`;
+
 - trigger `BEFORE INSERT`;
+
 - relacionamento entre fornecedor e produto;
+
 - validações de integridade.
 
 A sequência utilizada é:
 
 ```text
+
 seq_idfornecedor_numerico
+
 ```
 
 A função responsável pela geração é:
 
 ```text
+
 fn_gerar_idfornecedor_numerico()
+
 ```
 
 E a trigger é:
 
 ```text
+
 trg_gerar_idfornecedor_numerico
+
 ```
 
 O script completo está disponível em:
@@ -357,19 +515,33 @@ O script completo está disponível em:
 O fluxo implementado é:
 
 ```text
+
 Novo fornecedor
-      ↓
+
+      ↓
+
 INSERT na tabela fornecedor
-      ↓
+
+      ↓
+
 Trigger BEFORE INSERT
-      ↓
+
+      ↓
+
 Verificação do identificador numérico
-      ↓
+
+      ↓
+
 Próximo valor da SEQUENCE
-      ↓
+
+      ↓
+
 idfornecedor_numerico
-      ↓
+
+      ↓
+
 Relacionamento com produtos
+
 ```
 
 A sequência foi inicialmente sincronizada com os identificadores existentes na base.
@@ -377,11 +549,17 @@ A sequência foi inicialmente sincronizada com os identificadores existentes na 
 Os fornecedores existentes foram relacionados da seguinte forma:
 
 ```text
-F1  → 1
-F2  → 2
-F3  → 3
+
+F1  → 1
+
+F2  → 2
+
+F3  → 3
+
 ...
+
 F20 → 20
+
 ```
 
 Após a sincronização, o próximo fornecedor cadastrado recebe automaticamente o próximo identificador disponível.
@@ -393,7 +571,9 @@ Após a sincronização, o próximo fornecedor cadastrado recebe automaticamente
 A tabela `fornecedor` possui o campo:
 
 ```text
+
 idfornecedor_numerico
+
 ```
 
 do tipo `BIGINT`.
@@ -413,13 +593,17 @@ Foi realizado um teste controlado para verificar o funcionamento da geração au
 O fornecedor de teste utilizado foi:
 
 ```text
+
 F21
+
 ```
 
 Durante o teste, a trigger gerou:
 
 ```text
+
 F21 → 21
+
 ```
 
 Também foi realizado um teste de relacionamento com um produto fictício.
@@ -427,7 +611,9 @@ Também foi realizado um teste de relacionamento com um produto fictício.
 O produto de teste foi:
 
 ```text
+
 TESTE_F21
+
 ```
 
 e recebeu o identificador numérico correspondente ao fornecedor.
@@ -435,7 +621,9 @@ e recebeu o identificador numérico correspondente ao fornecedor.
 O teste foi executado dentro de uma transação e finalizado com:
 
 ```sql
+
 ROLLBACK;
+
 ```
 
 Dessa forma, os registros utilizados exclusivamente para teste não permaneceram na base definitiva.
@@ -443,6 +631,7 @@ Dessa forma, os registros utilizados exclusivamente para teste não permaneceram
 Evidências:
 
 - `evidence/15-3.4-teste-trigger.png`
+
 - `evidence/16-3.4-rollback-teste-trigger.png`
 
 ---
@@ -454,13 +643,17 @@ Após os testes, a sequência foi sincronizada novamente com o maior identificad
 O maior identificador existente é:
 
 ```text
+
 20
+
 ```
 
 A sequência foi ajustada para que o próximo valor disponível seja:
 
 ```text
+
 21
+
 ```
 
 Isso evita conflitos entre identificadores já existentes e novos fornecedores cadastrados.
@@ -475,13 +668,19 @@ A validação final é realizada por meio de consultas SQL no PostgreSQL, permit
 
 A primeira etapa da validação consistiu em comparar a quantidade de registros carregados no banco com a quantidade esperada para cada tabela.
 
-| Tabela              | Registros |
+| Tabela              | Registros |
+
 | ------------------- | --------: |
-| fornecedor          |        20 |
-| produtos_filial     |        20 |
-| venda               |        33 |
-| pedido_compra       |        29 |
-| entradas_mercadoria |        20 |
+
+| fornecedor          |        20 |
+
+| produtos_filial     |        20 |
+
+| venda               |        33 |
+
+| pedido_compra       |        29 |
+
+| entradas_mercadoria |        20 |
 
 Os resultados obtidos correspondem às quantidades esperadas para as tabelas analisadas.
 
@@ -497,11 +696,15 @@ Foi realizada uma verificação das tabelas `venda`, `pedido_compra` e `entradas
 
 A consulta não identificou registros com valor nulo no campo analisado.
 
-| Tabela              | Registros sem produto |
+| Tabela              | Registros sem produto |
+
 | ------------------- | --------------------: |
-| venda               |                     0 |
-| pedido_compra       |                     0 |
-| entradas_mercadoria |                     0 |
+
+| venda               |                     0 |
+
+| pedido_compra       |                     0 |
+
+| entradas_mercadoria |                     0 |
 
 **Evidência:**
 
@@ -515,12 +718,17 @@ Foi realizada uma verificação das tabelas `venda`, `pedido_compra`, `entradas_
 
 A consulta não identificou registros com valores negativos nos campos analisados.
 
-| Tabela              | Registros com valor negativo |
+| Tabela              | Registros com valor negativo |
+
 | ------------------- | ---------------------------: |
-| venda               |                            0 |
-| pedido_compra       |                            0 |
-| entradas_mercadoria |                            0 |
-| produtos_filial     |                            0 |
+
+| venda               |                            0 |
+
+| pedido_compra       |                            0 |
+
+| entradas_mercadoria |                            0 |
+
+| produtos_filial     |                            0 |
 
 **Evidência:**
 
@@ -535,15 +743,24 @@ Foi realizada uma validação para identificar produtos presentes na tabela `ven
 Foram identificados 8 produtos sem cadastro correspondente:
 
 | Produto |
+
 | ------- |
-| P21     |
-| P22     |
-| P23     |
-| P24     |
-| P25     |
-| P26     |
-| P27     |
-| P28     |
+
+| P21     |
+
+| P22     |
+
+| P23     |
+
+| P24     |
+
+| P25     |
+
+| P26     |
+
+| P27     |
+
+| P28     |
 
 Essa ocorrência já havia sido identificada durante a análise inicial da qualidade dos dados e foi mantida como inconsistência documentada, sem criação de cadastros fictícios.
 
@@ -559,10 +776,13 @@ Foi realizada uma validação para identificar entradas de mercadoria que não p
 
 Foram identificadas duas ocorrências:
 
-| Ordem de compra | NF-e  | Produto | Quantidade recebida |
+| Ordem de compra | NF-e  | Produto | Quantidade recebida |
+
 | --------------: | ----- | ------- | ------------------: |
-|              19 | NFE19 | P19     |                  64 |
-|              20 | NFE20 | P20     |                   6 |
+
+|              19 | NFE19 | P19     |                  64 |
+
+|              20 | NFE20 | P20     |                   6 |
 
 Essas ocorrências foram identificadas durante a análise inicial da qualidade dos dados e permanecem documentadas como inconsistências da fonte.
 
@@ -609,8 +829,11 @@ Foi realizada uma validação do relacionamento entre os produtos cadastrados e 
 A consulta apresentou os 20 produtos cadastrados, permitindo verificar:
 
 - `produto_id`;
+
 - `idfornecedor`;
+
 - `idfornecedor_numerico`;
+
 - razão social do fornecedor.
 
 A validação demonstrou a correspondência entre os registros de produtos e fornecedores cadastrados.
@@ -641,13 +864,19 @@ Foi realizada uma validação do cadastro de fornecedores para verificar a corre
 
 Os 20 fornecedores apresentaram correspondência entre os identificadores e suas respectivas razões sociais.
 
-| Identificador | ID numérico | Razão social       |
+| Identificador | ID numérico | Razão social       |
+
 | ------------- | ----------: | ------------------ |
-| F1            |           1 | Fornecedor 1 LTDA  |
-| F2            |           2 | Fornecedor 2 LTDA  |
-| F3            |           3 | Fornecedor 3 LTDA  |
-| ...           |         ... | ...                |
-| F20           |          20 | Fornecedor 20 LTDA |
+
+| F1            |           1 | Fornecedor 1 LTDA  |
+
+| F2            |           2 | Fornecedor 2 LTDA  |
+
+| F3            |           3 | Fornecedor 3 LTDA  |
+
+| ...           |         ... | ...                |
+
+| F20           |          20 | Fornecedor 20 LTDA |
 
 **Evidência:**
 
@@ -674,14 +903,23 @@ A validação com o cliente foi estruturada considerando o mês de fevereiro de 
 Os principais pontos a serem apresentados são:
 
 - quantidade de registros importados;
+
 - consistência dos produtos;
+
 - consumo por produto;
+
 - pedidos de compra;
+
 - entradas de mercadoria;
+
 - produtos requisitados e não recebidos;
+
 - divergências de quantidades;
+
 - consistência das datas;
+
 - relacionamento entre produtos e fornecedores;
+
 - identificação das inconsistências encontradas na fonte.
 
 A estratégia completa está documentada em:
@@ -699,18 +937,27 @@ As consultas de apoio à reunião estão disponíveis em:
 As evidências das principais etapas do projeto estão armazenadas na pasta:
 
 ```text
+
 evidence/
+
 ```
 
 As evidências incluem:
 
 - auditoria inicial da base;
+
 - identificação de inconsistências;
+
 - resultados das consultas SQL;
+
 - transformações realizadas;
+
 - testes da trigger;
+
 - rollback dos testes;
+
 - validações da implantação;
+
 - validação do relacionamento entre produtos e fornecedores.
 
 A numeração das evidências segue a ordem das etapas executadas durante o desenvolvimento.
@@ -721,14 +968,21 @@ A numeração das evidências segue a ordem das etapas executadas durante o dese
 
 A documentação do projeto está organizada em etapas:
 
-| Documento                       | Conteúdo                                              |
+| Documento                       | Conteúdo                                              |
+
 | ------------------------------- | ----------------------------------------------------- |
-| `01-entendimento-do-case.md`    | Entendimento inicial, fonte e estrutura dos dados     |
-| `02-processo-de-importacao.md`  | Estratégia e processo de importação                   |
-| `03-erros-e-inconsistencias.md` | Problemas e inconsistências identificados na base     |
-| `04-regras-de-negocio.md`       | Regras utilizadas para tratamento e validação         |
-| `05-estrategia-de-validacao.md` | Estratégia de validação com o cliente                 |
-| `06-resultados.md`              | Resultados das consultas, transformações e validações |
+
+| `01-entendimento-do-case.md`    | Entendimento inicial, fonte e estrutura dos dados     |
+
+| `02-processo-de-importacao.md`  | Estratégia e processo de importação                   |
+
+| `03-erros-e-inconsistencias.md` | Problemas e inconsistências identificados na base     |
+
+| `04-regras-de-negocio.md`       | Regras utilizadas para tratamento e validação         |
+
+| `05-estrategia-de-validacao.md` | Estratégia de validação com o cliente                 |
+
+| `06-resultados.md`              | Resultados das consultas, transformações e validações |
 
 ---
 
@@ -736,13 +990,19 @@ A documentação do projeto está organizada em etapas:
 
 Os scripts SQL estão organizados conforme a sequência lógica de execução:
 
-1. `01-create-tables.sql` — criação das tabelas;
-2. `02-import-data.sql` — processo de importação;
-3. `03-fixes-and-validations.sql` — validações e identificação de inconsistências;
-4. `04-basic-queries.sql` — consultas solicitadas no case;
-5. `05-transformations.sql` — transformações dos dados;
-6. `06-trigger.sql` — geração e relacionamento do identificador numérico do fornecedor;
-7. `07-client-validation.sql` — consultas de validação final.
+1\. `01-create-tables.sql` — criação das tabelas;
+
+2\. `02-import-data.sql` — processo de importação;
+
+3\. `03-fixes-and-validations.sql` — validações e identificação de inconsistências;
+
+4\. `04-basic-queries.sql` — consultas solicitadas no case;
+
+5\. `05-transformations.sql` — transformações dos dados;
+
+6\. `06-trigger.sql` — geração e relacionamento do identificador numérico do fornecedor;
+
+7\. `07-client-validation.sql` — consultas de validação final.
 
 ---
 
@@ -753,11 +1013,17 @@ A planilha original foi analisada e seus dados foram separados em arquivos CSV c
 A estrutura processada foi:
 
 ```text
+
 fornecedor.csv
+
 produtos_filial.csv
+
 venda.csv
+
 pedido_compra.csv
+
 entradas_mercadoria.csv
+
 ```
 
 A importação foi realizada utilizando o **DBeaver**, conectado ao PostgreSQL.
@@ -765,11 +1031,17 @@ A importação foi realizada utilizando o **DBeaver**, conectado ao PostgreSQL.
 Durante o processo foram considerados:
 
 - conversão de datas;
+
 - conversão de tipos numéricos;
+
 - tratamento dos nomes das colunas;
+
 - adequação da estrutura dos dados ao modelo PostgreSQL;
+
 - validação dos registros após a importação;
+
 - preservação dos dados originais;
+
 - identificação das inconsistências existentes na fonte.
 
 A documentação detalhada está disponível em:
@@ -789,19 +1061,33 @@ Quando não existe informação suficiente para determinar o valor correto de um
 A rastreabilidade do projeto é mantida por meio da relação entre:
 
 ```text
+
 Dado recebido
-      ↓
+
+      ↓
+
 Análise
-      ↓
+
+      ↓
+
 Regra de tratamento
-      ↓
+
+      ↓
+
 Implementação SQL
-      ↓
+
+      ↓
+
 Validação
-      ↓
+
+      ↓
+
 Evidência
-      ↓
+
+      ↓
+
 Resultado
+
 ```
 
 Essa abordagem permite acompanhar as decisões tomadas durante a implantação e reproduzir as etapas executadas.
@@ -817,13 +1103,17 @@ Foi gerado um backup completo da base PostgreSQL utilizando `pg_dump` no formato
 Arquivo disponibilizado no projeto:
 
 ```text
+
 backup/systock_case_backup.dump
+
 ```
 
 Comando utilizado:
 
 ```bash
+
 pg_dump -h localhost -p 5433 -U postgres -d systock_case -F c -f backup/systock_case_backup.dump
+
 ```
 
 ## Restauração do backup
@@ -831,7 +1121,9 @@ pg_dump -h localhost -p 5433 -U postgres -d systock_case -F c -f backup/systock_
 Para restaurar o backup em uma base PostgreSQL:
 
 ```bash
+
 pg_restore -h localhost -p 5433 -U postgres -d systock_case backup/systock_case_backup.dump
+
 ```
 
 O backup contém a estrutura e os dados utilizados durante a análise, incluindo as alterações necessárias para a implementação e validação da solução.
@@ -845,7 +1137,9 @@ O backup contém a estrutura e os dados utilizados durante a análise, incluindo
 Criar uma base PostgreSQL chamada:
 
 ```text
+
 systock_case
+
 ```
 
 ## 2. Executar a criação das tabelas
@@ -853,7 +1147,9 @@ systock_case
 Executar:
 
 ```text
+
 database/01-create-tables.sql
+
 ```
 
 ## 3. Importar os dados
@@ -861,23 +1157,33 @@ database/01-create-tables.sql
 Realizar a importação dos arquivos CSV presentes em:
 
 ```text
+
 data/processed/
+
 ```
 
 A ordem recomendada é:
 
 ```text
+
 fornecedor.csv
+
 produtos_filial.csv
+
 venda.csv
+
 pedido_compra.csv
+
 entradas_mercadoria.csv
+
 ```
 
 As orientações estão documentadas em:
 
 ```text
+
 database/02-import-data.sql
+
 ```
 
 ## 4. Executar as validações iniciais
@@ -885,7 +1191,9 @@ database/02-import-data.sql
 Executar:
 
 ```text
+
 database/03-fixes-and-validations.sql
+
 ```
 
 ## 5. Executar as consultas do case
@@ -893,7 +1201,9 @@ database/03-fixes-and-validations.sql
 Executar:
 
 ```text
+
 database/04-basic-queries.sql
+
 ```
 
 ## 6. Executar as transformações
@@ -901,7 +1211,9 @@ database/04-basic-queries.sql
 Executar:
 
 ```text
+
 database/05-transformations.sql
+
 ```
 
 ## 7. Configurar a trigger
@@ -909,7 +1221,9 @@ database/05-transformations.sql
 Executar:
 
 ```text
+
 database/06-trigger.sql
+
 ```
 
 ## 8. Executar as validações finais
@@ -917,7 +1231,9 @@ database/06-trigger.sql
 Executar:
 
 ```text
+
 database/07-client-validation.sql
+
 ```
 
 ---
@@ -929,14 +1245,23 @@ O projeto foi desenvolvido buscando reproduzir um cenário real de implantação
 Além da execução das consultas solicitadas, foram priorizados:
 
 - análise da qualidade da fonte;
+
 - identificação de inconsistências;
+
 - integridade referencial;
+
 - rastreabilidade;
+
 - documentação das decisões;
+
 - validação dos resultados;
+
 - testes controlados;
+
 - preservação dos dados originais;
+
 - backup da base;
+
 - organização das evidências.
 
 As inconsistências identificadas não foram corrigidas de forma arbitrária. Quando não havia informação suficiente para determinar o valor correto, a ocorrência foi mantida e documentada para validação com o responsável pelo processo.
@@ -944,13 +1269,21 @@ As inconsistências identificadas não foram corrigidas de forma arbitrária. Qu
 Essa abordagem permite diferenciar claramente:
 
 ```text
+
 Dado original
-      ↓
+
+      ↓
+
 Inconsistência identificada
-      ↓
+
+      ↓
+
 Regra aplicada
-      ↓
+
+      ↓
+
 Resultado validado
+
 ```
 
 ---

@@ -2,16 +2,13 @@
 
 ## 6.1 Consultas SQL
 
-Esta seção apresenta os resultados obtidos a partir das consultas SQL
-executadas no banco PostgreSQL, conforme os requisitos definidos no case
-técnico.
+Esta seção apresenta os resultados obtidos a partir das consultas SQL executadas no banco PostgreSQL, conforme os requisitos definidos no case técnico.
 
 ---
 
 ### 6.1.1 Consumo por produto em fevereiro de 2025
 
-Foi realizada uma consulta sobre a tabela `venda`, considerando os
-registros com `data_emissao` entre 01/02/2025 e 28/02/2025.
+Foi realizada uma consulta sobre a tabela `venda`, considerando os registros com `data_emissao` entre 01/02/2025 e 28/02/2025.
 
 O resultado apresentou 14 produtos com movimentação no período.
 
@@ -20,28 +17,26 @@ Para cada produto foram consolidados:
 - quantidade total consumida;
 - valor total consumido.
 
-O valor total consumido foi calculado a partir da multiplicação da
-quantidade vendida pelo valor unitário de cada registro, seguida da
-agregação por produto.
+O valor total consumido foi calculado a partir da multiplicação da quantidade vendida pelo valor unitário de cada registro, seguida da agregação por produto.
 
 #### Resultado
 
 | Produto | Quantidade consumida | Valor total consumido |
-|---|---:|---:|
-| P14 | 53 | 5.633,90 |
-| P15 | 27 | 1.171,80 |
-| P16 | 37,11 | 534,7551 |
-| P17 | 3 | 419,40 |
-| P18 | 5 | 926,15 |
-| P19 | 10 | 1.825,10 |
-| P20 | 2 | 137,08 |
-| P22 | 6 | 637,80 |
-| P23 | 7 | 303,80 |
-| P24 | 4 | 57,64 |
-| P25 | 8 | 1.118,40 |
-| P26 | 3,11 | 576,0653 |
-| P27 | 3 | 547,53 |
-| P7 | 5 | 203,75 |
+| ------- | -------------------: | --------------------: |
+| P14     |                   53 |              5.633,90 |
+| P15     |                   27 |              1.171,80 |
+| P16     |                37,11 |              534,7551 |
+| P17     |                    3 |                419,40 |
+| P18     |                    5 |                926,15 |
+| P19     |                   10 |              1.825,10 |
+| P20     |                    2 |                137,08 |
+| P22     |                    6 |                637,80 |
+| P23     |                    7 |                303,80 |
+| P24     |                    4 |                 57,64 |
+| P25     |                    8 |              1.118,40 |
+| P26     |                 3,11 |              576,0653 |
+| P27     |                    3 |                547,53 |
+| P7      |                    5 |                203,75 |
 
 #### Evidência
 
@@ -51,35 +46,46 @@ agregação por produto.
 
 ### 6.1.2 Produtos solicitados, mas não recebidos
 
-Foi realizada uma consulta relacionando os registros de `pedido_compra`
-com `entradas_mercadoria`, utilizando `ordem_compra`, `item` e
-`produto_id` para identificar os recebimentos correspondentes.
+Foi realizada uma consulta relacionando os registros de `pedido_compra` com `entradas_mercadoria`, utilizando `ordem_compra`, `item` e `produto_id` para identificar os recebimentos correspondentes.
 
-Foram identificados **11 registros de produtos solicitados sem
-quantidade recebida registrada**.
+Foram identificados **11 registros de produtos solicitados sem quantidade recebida registrada**.
 
-Todos os registros encontrados possuem `ordem_compra = 0` e
-`qtde_recebida = 0`, indicando ausência de uma ordem de compra válida
-e de recebimento registrado na origem.
+Todos os registros encontrados possuem `ordem_compra = 0` e `qtde_recebida = 0`, indicando ausência de uma ordem de compra válida e de recebimento associado ao relacionamento analisado.
 
-Os registros foram mantidos na base e sinalizados como inconsistência,
-sem aplicação de correção automática.
+Os registros foram mantidos na base e sinalizados como inconsistência, sem aplicação de correção automática.
 
 #### Resultado
 
 | Pedido | Ordem de compra | Item | Produto | Qtde. pedida | Qtde. recebida |
-|---:|---:|---:|---|---:|---:|
-| 19 | 0 | 1 | P19 | 20 | 0 |
-| 20 | 0 | 1 | P20 | 25 | 0 |
-| 21 | 0 | 1 | P12 | 12 | 0 |
-| 22 | 0 | 1 | P13 | 4 | 0 |
-| 23 | 0 | 1 | P14 | 6 | 0 |
-| 24 | 0 | 1 | P15 | 8 | 0 |
-| 25 | 0 | 1 | P16 | 9 | 0 |
-| 26 | 0 | 1 | P17 | 4 | 0 |
-| 27 | 0 | 1 | P18 | 3 | 0 |
-| 28 | 0 | 1 | P19 | 3 | 0 |
-| 29 | 0 | 1 | P20 | 2 | 0 |
+| -----: | --------------: | ---: | ------- | -----------: | -------------: |
+|     19 |               0 |    1 | P19     |           20 |              0 |
+|     20 |               0 |    1 | P20     |           25 |              0 |
+|     21 |               0 |    1 | P12     |           12 |              0 |
+|     22 |               0 |    1 | P13     |            4 |              0 |
+|     23 |               0 |    1 | P14     |            6 |              0 |
+|     24 |               0 |    1 | P15     |            8 |              0 |
+|     25 |               0 |    1 | P16     |            9 |              0 |
+|     26 |               0 |    1 | P17     |            4 |              0 |
+|     27 |               0 |    1 | P18     |            3 |              0 |
+|     28 |               0 |    1 | P19     |            3 |              0 |
+|     29 |               0 |    1 | P20     |            2 |              0 |
+
+#### Observação sobre os registros não recebidos
+
+Os 11 registros identificados pela consulta representam pedidos cuja quantidade recebida associada à combinação de `ORDEM_COMPRA`, `item` e `produto_id` é zero.
+
+Durante as validações posteriores, foi identificada uma situação adicional envolvendo os produtos P19 e P20.
+
+Embora esses produtos apareçam no resultado da Parte 2.2 por não possuírem recebimento associado à respectiva ordem de compra do pedido, existem registros correspondentes em `entradas_mercadoria`:
+
+- P19 — NFE19
+- P20 — NFE20
+
+Essas entradas estão associadas a ordens de compra diferentes das apresentadas nos respectivos registros de `pedido_compra`.
+
+Portanto, esses casos não devem ser interpretados simplesmente como ausência física de recebimento. O achado indica uma inconsistência no relacionamento entre o pedido de compra e o registro de entrada da mercadoria.
+
+Essa diferença foi mantida como inconsistência da base recebida e documentada na validação de relacionamento entre pedidos e entradas.
 
 #### Evidência
 
@@ -91,15 +97,13 @@ sem aplicação de correção automática.
 
 ### 6.2.1 Concatenação de produto e descrição
 
-Foi realizada uma transformação para concatenar o identificador do produto
-com sua respectiva descrição.
+Foi realizada uma transformação para concatenar o identificador do produto com sua respectiva descrição.
 
 O formato utilizado foi:
 
 `produto_id - descricao`
 
-A consulta foi executada sobre a tabela `produtos_filial` e apresentou os
-20 produtos cadastrados na base.
+A consulta foi executada sobre a tabela `produtos_filial` e apresentou os 20 produtos cadastrados na base.
 
 A consulta utilizada está disponível em:
 
@@ -113,13 +117,11 @@ A consulta utilizada está disponível em:
 
 ### 6.2.2 Formatação das datas
 
-As datas presentes na tabela `pedido_compra` foram formatadas para o padrão
-solicitado no case:
+As datas presentes na tabela `pedido_compra` foram formatadas para o padrão solicitado no case:
 
 `DD/MM/YYYY`
 
-Foi utilizada a função `TO_CHAR` do PostgreSQL para apresentar as datas de
-pedido e entrega no formato definido.
+Foi utilizada a função `TO_CHAR` do PostgreSQL para apresentar as datas de pedido e entrega no formato definido.
 
 A consulta utilizada está disponível em:
 
@@ -133,8 +135,7 @@ A consulta utilizada está disponível em:
 
 ### 6.2.3 Produtos requisitados mais de 10 vezes
 
-Foi realizada a contagem das requisições por produto na tabela
-`pedido_compra`.
+Foi realizada a contagem das requisições por produto na tabela `pedido_compra`.
 
 A regra utilizada foi:
 
@@ -142,8 +143,7 @@ A regra utilizada foi:
 
 A consulta não retornou registros.
 
-Dessa forma, nenhum produto apresentou mais de 10 requisições no conjunto de
-dados analisado.
+Dessa forma, nenhum produto apresentou mais de 10 requisições no conjunto de dados analisado.
 
 A consulta utilizada está disponível em:
 
@@ -157,36 +157,36 @@ A consulta utilizada está disponível em:
 
 ### 6.2.4 Identificação numérica dos fornecedores
 
-Foi implementado o tratamento do identificador dos fornecedores para permitir
-o relacionamento por meio de um identificador numérico.
+Foi implementado um identificador numérico adicional para os fornecedores, permitindo o relacionamento entre fornecedores e produtos por meio de uma chave numérica.
 
-Foi adicionada a coluna `idfornecedor_numerico` na tabela `fornecedor`, com o
-mapeamento dos identificadores existentes.
+Foi adicionada a coluna `idfornecedor_numerico` à tabela `fornecedor`.
 
-O resultado obtido foi:
+Para os fornecedores existentes na base, os identificadores foram mapeados conforme o padrão:
 
 | Identificador | Identificador numérico |
-|---|---:|
-| F1 | 1 |
-| F2 | 2 |
-| F3 | 3 |
-| F4 | 4 |
-| F5 | 5 |
-| F6 | 6 |
-| F7 | 7 |
-| F8 | 8 |
-| F9 | 9 |
-| F10 | 10 |
-| F11 | 11 |
-| F12 | 12 |
-| F13 | 13 |
-| F14 | 14 |
-| F15 | 15 |
-| F16 | 16 |
-| F17 | 17 |
-| F18 | 18 |
-| F19 | 19 |
-| F20 | 20 |
+| ------------- | ---------------------: |
+| `F1`          |                      1 |
+| `F2`          |                      2 |
+| `F3`          |                      3 |
+| `F4`          |                      4 |
+| `F5`          |                      5 |
+| `F6`          |                      6 |
+| `F7`          |                      7 |
+| `F8`          |                      8 |
+| `F9`          |                      9 |
+| `F10`         |                     10 |
+| `F11`         |                     11 |
+| `F12`         |                     12 |
+| `F13`         |                     13 |
+| `F14`         |                     14 |
+| `F15`         |                     15 |
+| `F16`         |                     16 |
+| `F17`         |                     17 |
+| `F18`         |                     18 |
+| `F19`         |                     19 |
+| `F20`         |                     20 |
+
+Para novos fornecedores, foi criada a sequência `seq_idfornecedor_numerico`, responsável pela geração automática de novos identificadores numéricos.
 
 A implementação está disponível em:
 
@@ -200,8 +200,7 @@ A implementação está disponível em:
 
 ### 6.2.5 Relacionamento entre produto e fornecedor
 
-Foi adicionada a coluna `idfornecedor_numerico` à tabela
-`produtos_filial`.
+Foi adicionada a coluna `idfornecedor_numerico` à tabela `produtos_filial`.
 
 O relacionamento foi implementado por meio de uma chave estrangeira entre:
 
@@ -211,15 +210,13 @@ e
 
 `fornecedor.idfornecedor_numerico`.
 
-A validação apresentou os 20 produtos cadastrados relacionados aos seus
-respectivos fornecedores.
+A validação apresentou os produtos cadastrados relacionados aos seus respectivos fornecedores.
 
 #### Evidência
 
 ![Relacionamento produto e fornecedor](../evidence/24-4.8-relacionamento-produto-fornecedor.png)
 
-Também foi realizada uma validação específica da integridade do identificador
-numérico, não sendo encontrados registros sem fornecedor correspondente.
+Também foi realizada uma validação específica da integridade do identificador numérico, não sendo encontrados registros sem fornecedor correspondente.
 
 #### Evidência
 
@@ -227,40 +224,47 @@ numérico, não sendo encontrados registros sem fornecedor correspondente.
 
 ---
 
-### 6.2.6 Trigger de preenchimento do identificador numérico
+### 6.2.6 Trigger de geração e preenchimento do identificador numérico
 
-Foi implementada uma trigger para preencher automaticamente o campo
-`idfornecedor_numerico` da tabela `produtos_filial` durante operações de
-inserção ou atualização do fornecedor.
+Foi implementada uma solução composta por sequência, funções e triggers para controlar automaticamente o identificador numérico dos fornecedores e seu relacionamento com os produtos.
 
-A trigger criada foi:
+A sequência criada foi:
 
-`trg_preencher_idfornecedor_numerico`
+`seq_idfornecedor_numerico`
 
-A função associada realiza a busca do fornecedor informado em
-`idfornecedor` e preenche o identificador numérico correspondente.
+A trigger `trg_gerar_idfornecedor_numerico` é executada antes da inserção de um novo fornecedor e utiliza a sequência para gerar automaticamente o valor de `idfornecedor_numerico` quando o campo ainda não estiver preenchido.
 
-Caso o fornecedor informado não seja encontrado no cadastro, a função
-interrompe a operação e retorna uma exceção.
+Também foi implementada a trigger `trg_preencher_idfornecedor_numerico` na tabela `produtos_filial`.
 
-A implementação está disponível em:
+Essa trigger é executada durante inserções ou alterações do campo `idfornecedor`. A função associada localiza o fornecedor informado e preenche automaticamente o respectivo `idfornecedor_numerico`.
+
+Caso o fornecedor informado não seja encontrado no cadastro, a operação é interrompida e uma exceção é gerada.
+
+A implementação completa está disponível em:
 
 `database/06-trigger.sql`
 
-#### Teste funcional
+#### Teste funcional da geração automática
 
-Foi realizado um teste utilizando o fornecedor `F8`.
+Foi realizado um teste utilizando temporariamente um novo fornecedor identificado como `F21`.
 
-O registro temporário foi inserido com:
+Ao inserir o fornecedor sem informar `idfornecedor_numerico`, a trigger gerou automaticamente o identificador numérico correspondente.
 
-`idfornecedor = F8`
+Resultado observado:
 
-A trigger preencheu automaticamente:
+`F21 → 21`
 
-`idfornecedor_numerico = 8`
+Após a validação, a transação foi revertida utilizando `ROLLBACK`, evitando a permanência do registro de teste na base.
 
-Após a validação do comportamento, a transação foi revertida utilizando
-`ROLLBACK`, evitando a permanência do registro de teste na base.
+#### Teste do relacionamento
+
+Também foi realizado um teste inserindo temporariamente um produto relacionado ao fornecedor de teste.
+
+A trigger da tabela `produtos_filial` identificou o fornecedor informado em `idfornecedor` e preencheu automaticamente `idfornecedor_numerico`, permitindo o relacionamento com a tabela `fornecedor`.
+
+O teste foi posteriormente revertido com `ROLLBACK`.
+
+Os testes não alteraram a base definitiva utilizada na entrega.
 
 #### Evidências
 
@@ -272,25 +276,21 @@ Após a validação do comportamento, a transação foi revertida utilizando
 
 ## 6.3 Considerações finais
 
-Os resultados foram obtidos diretamente a partir dos dados importados para o
-PostgreSQL e validados por meio de consultas SQL executadas no DBeaver.
+Os resultados foram obtidos diretamente a partir dos dados importados para o PostgreSQL e validados por meio de consultas SQL executadas no DBeaver.
 
-As transformações solicitadas no case foram implementadas e documentadas,
-incluindo:
+As transformações solicitadas no case foram implementadas e documentadas, incluindo:
 
 - consumo por produto em fevereiro de 2025;
 - identificação de produtos solicitados e não recebidos;
 - concatenação de produto e descrição;
 - formatação das datas;
 - identificação de produtos com mais de 10 requisições;
-- tratamento do identificador numérico dos fornecedores;
-- relacionamento entre produtos e fornecedores;
-- implementação e teste da trigger.
+- geração e tratamento do identificador numérico dos fornecedores;
+- relacionamento entre produtos e fornecedores por identificador numérico;
+- implementação e teste das triggers de fornecedor e produto;
+- validação dos testes com `ROLLBACK`, sem alteração permanente da base.
 
-As inconsistências identificadas durante a análise não foram corrigidas
-automaticamente nesta etapa. O tratamento considera a preservação dos dados de
-origem, a rastreabilidade das alterações e a necessidade de validação antes de
-qualquer correção definitiva.
+As inconsistências identificadas durante a análise não foram corrigidas automaticamente nesta etapa. O tratamento considera a preservação dos dados de origem, a rastreabilidade das alterações e a necessidade de validação antes de qualquer correção definitiva.
 
 As consultas utilizadas estão disponíveis no diretório:
 
